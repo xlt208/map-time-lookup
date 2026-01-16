@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 
 interface MapProps {
-  locateRef: RefObject<any>;
+  locateRef: RefObject<HTMLArcgisLocateElement | null>;
   onViewClick: (e: CustomEvent) => void;
   onLocateReady: (e: CustomEvent) => void;
   onLocateSuccess: (e: CustomEvent) => void;
