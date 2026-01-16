@@ -1,5 +1,4 @@
 import type Point from "@arcgis/core/geometry/Point";
-import { webMercatorToGeographic } from "@arcgis/core/geometry/support/webMercatorUtils";
 import "@arcgis/map-components/components/arcgis-locate";
 import "@arcgis/map-components/components/arcgis-map";
 import "@arcgis/map-components/components/arcgis-zoom";
@@ -15,16 +14,10 @@ import "./App.css";
 import { Map } from "./components/Map";
 import { TimeListPanel } from "./components/TimeListPanel";
 import type { LocationTime } from "./types";
+import { toGeographic } from "./utils/geometry";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
 const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
-
-const toGeographic = (mapPoint: Point) => {
-  if (mapPoint.spatialReference?.isWebMercator) {
-    return webMercatorToGeographic(mapPoint) as Point;
-  }
-  return mapPoint;
-};
 
 function App() {
   const [times, setTimes] = useState<LocationTime[]>([]);
