@@ -1,5 +1,4 @@
 import type Point from "@arcgis/core/geometry/Point";
-
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Map } from "./components/Map";
@@ -26,6 +25,10 @@ function App() {
   const handleClick = async (e: CustomEvent) => {
     const mapPoint = e.detail.mapPoint as Point;
     const geographicPoint = toGeographic(mapPoint);
+    if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
+      console.error("Map point missing latitude/longitude.");
+      return;
+    }
     const latitude = Number(geographicPoint.latitude.toFixed(4));
     const longitude = Number(geographicPoint.longitude.toFixed(4));
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
