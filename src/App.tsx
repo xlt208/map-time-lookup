@@ -22,25 +22,23 @@ function App() {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const handleClick = async (e: CustomEvent) => {
-    const mapPoint = e.detail.mapPoint as Point;
-    const geographicPoint = toGeographic(mapPoint);
-    if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
-      console.error("Map point missing latitude/longitude.");
-      return;
-    }
-    const latitude = Number(geographicPoint.latitude.toFixed(4));
-    const longitude = Number(geographicPoint.longitude.toFixed(4));
+  const addTimeEntry = async (
+    latitude: number,
+    longitude: number,
+    labelOverride?: string,
+  ) => {
+    const displayLatitude = Number(latitude.toFixed(4));
+    const displayLongitude = Number(longitude.toFixed(4));
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const label = `${latitude}, ${longitude}`;
+    const label = labelOverride ?? `${displayLatitude}, ${displayLongitude}`;
 
     setTimes((prevTimes) => [
       {
         id,
         label,
         timeZone: "UTC",
-        latitude,
-        longitude,
+        latitude: displayLatitude,
+        longitude: displayLongitude,
         isLoading: true,
       },
       ...prevTimes,
@@ -111,6 +109,17 @@ function App() {
     }
   };
 
+  const handleClick = async (e: CustomEvent) => {
+    const mapPoint = e.detail.mapPoint as Point;
+    const geographicPoint = toGeographic(mapPoint);
+    if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
+      console.error("Map point missing latitude/longitude.");
+      return;
+    }
+
+    await addTimeEntry(geographicPoint.latitude, geographicPoint.longitude);
+  };
+
   const handleLocateReady = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -125,9 +134,15 @@ function App() {
     }
   };
 
-  const handleLocateSuccess = () => {
-    console.log("located");
-    console.log(times);
+  const handleLocateSuccess = async (e: CustomEvent) => {
+    const position = e.detail?.position as GeolocationPosition | undefined;
+    const coords = position?.coords;
+    if (!coords) {
+      console.error("Locate success missing coordinates.");
+      return;
+    }
+
+    await addTimeEntry(coords.latitude, coords.longitude, "Current Location");
   };
 
   return (
