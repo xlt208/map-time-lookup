@@ -15,15 +15,7 @@ import type Point from "@arcgis/core/geometry/Point";
 import { webMercatorToGeographic } from "@arcgis/core/geometry/support/webMercatorUtils";
 import { useEffect, useRef, useState } from "react";
 
-interface LocationTime {
-  id: string;
-  label: string;
-  timeZone: string;
-  latitude: number;
-  longitude: number;
-  isLoading: boolean;
-  error?: string;
-}
+import type { LocationTime } from "./types";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
 const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
@@ -106,7 +98,9 @@ function App() {
       }
       const data = await response.json();
       if (data.status && data.status !== "OK") {
-        throw new Error(`Time zone lookup failed (${data.message || data.status})`);
+        throw new Error(
+          `Time zone lookup failed (${data.message || data.status})`,
+        );
       }
 
       const timeZone = data.zoneName || "UTC";
