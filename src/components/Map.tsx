@@ -1,7 +1,3 @@
-import "@arcgis/map-components/components/arcgis-locate";
-import "@arcgis/map-components/components/arcgis-map";
-import "@arcgis/map-components/components/arcgis-zoom";
-
 import type { RefObject } from "react";
 
 interface MapProps {

@@ -1,7 +1,3 @@
-import "@esri/calcite-components/components/calcite-list";
-import "@esri/calcite-components/components/calcite-list-item";
-import "@esri/calcite-components/components/calcite-panel";
-import "@esri/calcite-components/components/calcite-shell-panel";
 import type { LocationTime } from "../types";
 import { formatTime } from "../utils/time";
 
