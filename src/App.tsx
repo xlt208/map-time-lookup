@@ -12,7 +12,7 @@ const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
 function App() {
   const [times, setTimes] = useState<LocationTime[]>([]);
   const [now, setNow] = useState(() => Date.now());
-  const locateRef = useRef<HTMLArcgisLocateElement>(null);
+  const locateRef = useRef<HTMLArcgisLocateElement | null>(null);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {

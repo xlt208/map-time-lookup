@@ -23,6 +23,7 @@ export const Map = ({
     <arcgis-locate
       ref={locateRef}
       slot="top-left"
+      scale={12000000}
       onarcgisReady={onLocateReady}
       onarcgisSuccess={onLocateSuccess}
     />
