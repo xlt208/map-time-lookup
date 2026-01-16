@@ -1,3 +1,5 @@
+import type Point from "@arcgis/core/geometry/Point";
+import { webMercatorToGeographic } from "@arcgis/core/geometry/support/webMercatorUtils";
 import "@arcgis/map-components/components/arcgis-locate";
 import "@arcgis/map-components/components/arcgis-map";
 import "@arcgis/map-components/components/arcgis-zoom";
@@ -8,13 +10,9 @@ import "@esri/calcite-components/components/calcite-navigation-logo";
 import "@esri/calcite-components/components/calcite-panel";
 import "@esri/calcite-components/components/calcite-shell";
 import "@esri/calcite-components/components/calcite-shell-panel";
-
-import "./App.css";
-
-import type Point from "@arcgis/core/geometry/Point";
-import { webMercatorToGeographic } from "@arcgis/core/geometry/support/webMercatorUtils";
 import { useEffect, useRef, useState } from "react";
-
+import "./App.css";
+import { Map } from "./components/Map";
 import type { LocationTime } from "./types";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
@@ -143,7 +141,7 @@ function App() {
     }
   };
 
-  const handleLocateReady = (e: CustomEvent) => {
+  const handleLocateReady = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async () => {
@@ -157,7 +155,7 @@ function App() {
     }
   };
 
-  const handleLocateSuccess = (e: CustomEvent) => {
+  const handleLocateSuccess = () => {
     console.log("located");
     console.log(times);
   };
@@ -171,21 +169,12 @@ function App() {
           slot="logo"
         />
       </calcite-navigation>
-      <arcgis-map
-        basemap="gray-vector"
-        center={[0, 0]}
-        zoom={2}
-        style={{ display: "block", height: "100vh", width: "100%" }}
-        onarcgisViewClick={handleClick}
-      >
-        <arcgis-locate
-          ref={locateRef}
-          slot="top-left"
-          onarcgisReady={handleLocateReady}
-          onarcgisSuccess={handleLocateSuccess}
-        />
-        <arcgis-zoom slot="top-right" />
-      </arcgis-map>
+      <Map
+        locateRef={locateRef}
+        onViewClick={handleClick}
+        onLocateReady={handleLocateReady}
+        onLocateSuccess={handleLocateSuccess}
+      />
 
       <calcite-shell-panel
         width="l"
