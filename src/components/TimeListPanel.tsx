@@ -14,30 +14,26 @@ export const TimeListPanel = ({ times, now }: TimeListPanelProps) => (
     displayMode="dock"
     resizable
   >
-    <calcite-panel heading="Current Local Times">
+    <calcite-panel
+      heading="Current Local Times"
+      description="Click on the map to view the local time."
+    >
       <calcite-list label="Current Local Times">
-        {times.length === 0 ? (
-          <calcite-list-item
-            label="Click the map to add a time."
-            description="Each click adds a new local time entry."
-          />
-        ) : (
-          times.map((item) => {
-            const description = item.isLoading
-              ? "Fetching time zone..."
-              : item.error
-                ? item.error
-                : formatTime(item.timeZone, new Date(now));
+        {times.map((item) => {
+          const description = item.isLoading
+            ? "Fetching time zone..."
+            : item.error
+              ? item.error
+              : formatTime(item.timeZone, new Date(now));
 
-            return (
-              <calcite-list-item
-                key={item.id}
-                label={item.label}
-                description={description}
-              />
-            );
-          })
-        )}
+          return (
+            <calcite-list-item
+              key={item.id}
+              label={item.label}
+              description={description}
+            />
+          );
+        })}
       </calcite-list>
     </calcite-panel>
   </calcite-shell-panel>
