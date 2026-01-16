@@ -8,6 +8,7 @@ import { toGeographic } from "./utils/geometry";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
 const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
+const CURRENT_LOCATION_ID = "current-location";
 
 function App() {
   const [times, setTimes] = useState<LocationTime[]>([]);
@@ -26,23 +27,33 @@ function App() {
     latitude: number,
     longitude: number,
     labelOverride?: string,
+    entryId?: string,
   ) => {
     const displayLatitude = Number(latitude.toFixed(4));
     const displayLongitude = Number(longitude.toFixed(4));
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const id =
+      entryId ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const label = labelOverride ?? `${displayLatitude}, ${displayLongitude}`;
 
-    setTimes((prevTimes) => [
-      {
+    setTimes((prevTimes) => {
+      const existingIndex = prevTimes.findIndex((item) => item.id === id);
+      const updatedEntry = {
         id,
         label,
         timeZone: "UTC",
         latitude: displayLatitude,
         longitude: displayLongitude,
         isLoading: true,
-      },
-      ...prevTimes,
-    ]);
+      };
+
+      if (existingIndex >= 0) {
+        const nextTimes = [...prevTimes];
+        nextTimes[existingIndex] = updatedEntry;
+        return nextTimes;
+      }
+
+      return [updatedEntry, ...prevTimes];
+    });
 
     try {
       if (!TIMEZONEDB_API_KEY) {
@@ -142,7 +153,12 @@ function App() {
       return;
     }
 
-    await addTimeEntry(coords.latitude, coords.longitude, "Current Location");
+    await addTimeEntry(
+      coords.latitude,
+      coords.longitude,
+      "Current Location",
+      CURRENT_LOCATION_ID,
+    );
   };
 
   return (
