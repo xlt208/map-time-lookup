@@ -171,9 +171,9 @@ function App() {
         geometry: mapPoint,
         symbol: {
           type: "simple-marker",
-          color: [0, 122, 255, 0.6],
+          color: "#fff",
           size: 8,
-          outline: { color: [255, 255, 255], width: 1 },
+          outline: { color: "#fff", width: 1 },
         },
       });
       graphicsLayerRef.current.add(graphic);
