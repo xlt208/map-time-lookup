@@ -31,7 +31,19 @@ export const TimeListPanel = ({ times, now }: TimeListPanelProps) => (
               key={item.id}
               label={item.label}
               description={description}
-            />
+            >
+              <span
+                slot="content-start"
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: item.color ?? "#888",
+                  display: "inline-block",
+                  marginRight: "8px",
+                }}
+              />
+            </calcite-list-item>
           );
         })}
       </calcite-list>

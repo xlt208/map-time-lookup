@@ -5,5 +5,6 @@ export interface LocationTime {
   latitude: number;
   longitude: number;
   isLoading: boolean;
+  color?: string;
   error?: string;
 }

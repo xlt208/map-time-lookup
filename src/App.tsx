@@ -13,11 +13,13 @@ const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
 const CURRENT_LOCATION_ID = "current-location";
 
 function App() {
-  const [times, setTimes] = useState<LocationTime[]>([]);
   const [now, setNow] = useState(() => Date.now());
+  const [times, setTimes] = useState<LocationTime[]>([]);
   const mapRef = useRef<HTMLArcgisMapElement | null>(null);
   const locateRef = useRef<HTMLArcgisLocateElement | null>(null);
   const graphicsLayerRef = useRef<GraphicsLayer | null>(null);
+  const colorIndexRef = useRef(0);
+  const timeZoneColorsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -27,9 +29,23 @@ function App() {
     return () => window.clearInterval(intervalId);
   }, []);
 
+  const getTimeZoneColor = (timeZone: string) => {
+    const existingColor = timeZoneColorsRef.current[timeZone];
+    if (existingColor) {
+      return existingColor;
+    }
+
+    const hue = (colorIndexRef.current * 137.508) % 360;
+    colorIndexRef.current += 1;
+    const color = `hsl(${Math.round(hue)}, 70%, 50%)`;
+    timeZoneColorsRef.current[timeZone] = color;
+    return color;
+  };
+
   const addTimeEntry = async (
     latitude: number,
     longitude: number,
+    mapPoint?: Point,
     labelOverride?: string,
     entryId?: string,
   ) => {
@@ -85,6 +101,22 @@ function App() {
       }
 
       const timeZone = data.zoneName || "UTC";
+      const color = getTimeZoneColor(timeZone);
+
+      if (mapPoint && graphicsLayerRef.current) {
+        graphicsLayerRef.current.add(
+          new Graphic({
+            geometry: mapPoint,
+            symbol: {
+              type: "simple-marker",
+              color,
+              size: 8,
+              outline: { color: "#fff", width: 1 },
+            },
+          }),
+        );
+      }
+
       const locationLabel =
         data.cityName && data.regionName
           ? `${data.cityName}, ${data.regionName}`
@@ -102,6 +134,7 @@ function App() {
                 timeZone,
                 label: locationLabel,
                 isLoading: false,
+                color,
               }
             : item,
         ),
@@ -152,7 +185,11 @@ function App() {
       return;
     }
 
-    await addTimeEntry(geographicPoint.latitude, geographicPoint.longitude);
+    await addTimeEntry(
+      geographicPoint.latitude,
+      geographicPoint.longitude,
+      mapPoint,
+    );
   };
 
   const handleLocateReady = () => {
@@ -180,6 +217,7 @@ function App() {
     await addTimeEntry(
       coords.latitude,
       coords.longitude,
+      undefined,
       "Current Location",
       CURRENT_LOCATION_ID,
     );
