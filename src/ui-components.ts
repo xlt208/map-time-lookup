@@ -1,5 +1,6 @@
 import "@arcgis/map-components/components/arcgis-locate";
 import "@arcgis/map-components/components/arcgis-map";
+import "@arcgis/map-components/components/arcgis-search";
 import "@arcgis/map-components/components/arcgis-zoom";
 
 import "@esri/calcite-components/components/calcite-list";

@@ -26,13 +26,14 @@ export const Map = ({
     onarcgisViewReadyChange={onViewReady}
     onarcgisViewClick={onViewClick}
   >
+    <arcgis-search slot="top-start" locationDisabled={true} />
+    <arcgis-zoom slot="top-end" />
     <arcgis-locate
       ref={locateRef}
-      slot="top-left"
+      slot="bottom-end"
       scale={12000000}
       onarcgisReady={onLocateReady}
       onarcgisSuccess={onLocateSuccess}
     />
-    <arcgis-zoom slot="top-right" />
   </arcgis-map>
 );
