@@ -1,4 +1,6 @@
 import type Point from "@arcgis/core/geometry/Point";
+import Graphic from "@arcgis/core/Graphic";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Map } from "./components/Map";
@@ -13,7 +15,9 @@ const CURRENT_LOCATION_ID = "current-location";
 function App() {
   const [times, setTimes] = useState<LocationTime[]>([]);
   const [now, setNow] = useState(() => Date.now());
+  const mapRef = useRef<HTMLArcgisMapElement | null>(null);
   const locateRef = useRef<HTMLArcgisLocateElement | null>(null);
+  const graphicsLayerRef = useRef<GraphicsLayer | null>(null);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -120,8 +124,28 @@ function App() {
     }
   };
 
+  const handleViewReady = () => {
+    const layer = new GraphicsLayer();
+    mapRef.current?.map?.add(layer);
+    graphicsLayerRef.current = layer;
+  };
+
   const handleClick = async (e: CustomEvent) => {
     const mapPoint = e.detail.mapPoint as Point;
+
+    if (graphicsLayerRef.current) {
+      const graphic = new Graphic({
+        geometry: mapPoint,
+        symbol: {
+          type: "simple-marker",
+          color: [0, 122, 255, 0.6],
+          size: 8,
+          outline: { color: [255, 255, 255], width: 1 },
+        },
+      });
+      graphicsLayerRef.current.add(graphic);
+    }
+
     const geographicPoint = toGeographic(mapPoint);
     if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
       console.error("Map point missing latitude/longitude.");
@@ -171,7 +195,9 @@ function App() {
         />
       </calcite-navigation>
       <Map
+        mapRef={mapRef}
         locateRef={locateRef}
+        onViewReady={handleViewReady}
         onViewClick={handleClick}
         onLocateReady={handleLocateReady}
         onLocateSuccess={handleLocateSuccess}
