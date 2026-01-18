@@ -118,13 +118,14 @@ function App() {
       }
 
       const locationLabel =
-        data.cityName && data.regionName
+        (label === "Current Location" ? `${label}: ` : "") +
+        (data.cityName && data.regionName
           ? `${data.cityName}, ${data.regionName}`
           : data.cityName ||
             data.regionName ||
             data.countryCode ||
             timeZone ||
-            label;
+            label);
 
       setTimes((prevTimes) =>
         prevTimes.map((item) =>
