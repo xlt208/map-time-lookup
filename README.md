@@ -2,7 +2,7 @@
 
 A personal learning project built with [Vite](https://vite.dev/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [ArcGIS Maps SDK for JavaScript](https://developers.arcgis.com/javascript/latest/), and the [Calcite Design System](https://developers.arcgis.com/calcite-design-system/).
 
-Click on the map to capture a location and see its current local time. Each click adds another time entry so you can compare multiple time zones at once.
+Click on the map or search for a place to capture a location and see its current local time. Each selection adds a time entry so you can compare multiple time zones at once.
 
 ## Live Demo
 
@@ -15,6 +15,9 @@ I work with colleagues around the world. This app helps me see everyone's local 
 ## Features
 
 - Click-to-add time entries for any location.
+- Search places and add their local times.
+- One-tap "current location" lookup.
+- Remove time entries from the list.
 - Always-current local time display for multiple locations.
 - Simple, focused UI built with ArcGIS Map Components and Calcite.
 
