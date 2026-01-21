@@ -207,6 +207,39 @@ function App() {
     }
   };
 
+  const handleSearchSelect = async (e: CustomEvent) => {
+    const detail = e.detail as __esri.SearchSelectResultEvent | undefined;
+    const result = detail?.result;
+    const geometry = result?.feature?.geometry;
+    let mapPoint: Point | undefined;
+
+    if (geometry?.type === "point") {
+      mapPoint = geometry as Point;
+    } else if ("extent" in (geometry ?? {}) && geometry?.extent) {
+      mapPoint = geometry.extent.center as Point;
+    } else if (result?.extent) {
+      mapPoint = result.extent.center as Point;
+    }
+
+    if (!mapPoint) {
+      console.error("Search result missing geometry.");
+      return;
+    }
+
+    const geographicPoint = toGeographic(mapPoint);
+    if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
+      console.error("Search result missing latitude/longitude.");
+      return;
+    }
+
+    await addTimeEntry(
+      geographicPoint.latitude,
+      geographicPoint.longitude,
+      mapPoint,
+      result?.name,
+    );
+  };
+
   const handleLocateSuccess = async (e: CustomEvent) => {
     const position = e.detail?.position as GeolocationPosition | undefined;
     const coords = position?.coords;
@@ -238,6 +271,7 @@ function App() {
         locateRef={locateRef}
         onViewReady={handleViewReady}
         onViewClick={handleClick}
+        onSearchSelect={handleSearchSelect}
         onLocateReady={handleLocateReady}
         onLocateSuccess={handleLocateSuccess}
       />
