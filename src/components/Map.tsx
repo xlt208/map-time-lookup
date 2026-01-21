@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { mapScale, mapZoom } from "../utils/map";
+import { MAP_SCALE, MAP_ZOOM } from "../utils/map";
 
 interface MapProps {
   mapRef: RefObject<HTMLArcgisMapElement | null>;
@@ -24,7 +24,7 @@ export const Map = ({
     ref={mapRef}
     basemap="gray-vector"
     center={[0, 0]}
-    zoom={mapZoom}
+    zoom={MAP_ZOOM}
     style={{ display: "block", height: "100vh", width: "100%" }}
     onarcgisViewReadyChange={onViewReady}
     onarcgisViewClick={onViewClick}
@@ -34,7 +34,7 @@ export const Map = ({
       locationDisabled={true}
       resultGraphicDisabled={true}
       goToOverride={(view, goToParams) => {
-        return view.goTo({ target: goToParams.target.target, zoom: mapZoom });
+        return view.goTo({ target: goToParams.target.target, zoom: MAP_ZOOM });
       }}
       onarcgisSelectResult={onSearchSelect}
     />
@@ -42,7 +42,7 @@ export const Map = ({
     <arcgis-locate
       ref={locateRef}
       slot="bottom-end"
-      scale={mapScale}
+      scale={MAP_SCALE}
       onarcgisReady={onLocateReady}
       onarcgisSuccess={onLocateSuccess}
     />

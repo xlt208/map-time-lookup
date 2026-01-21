@@ -7,10 +7,10 @@ import { Map } from "./components/Map";
 import { TimeListPanel } from "./components/TimeListPanel";
 import type { LocationTime } from "./types";
 import { toGeographic } from "./utils/geometry";
+import { CURRENT_LOCATION, CURRENT_LOCATION_ID } from "./utils/map";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
 const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
-const CURRENT_LOCATION_ID = "current-location";
 
 function App() {
   const [now, setNow] = useState(() => Date.now());
@@ -106,6 +106,7 @@ function App() {
       if (mapPoint && graphicsLayerRef.current) {
         graphicsLayerRef.current.add(
           new Graphic({
+            attributes: { id },
             geometry: mapPoint,
             symbol: {
               type: "simple-marker",
@@ -118,7 +119,7 @@ function App() {
       }
 
       const locationLabel =
-        (label === "Current Location" ? `${label}: ` : "") +
+        (label === CURRENT_LOCATION ? `${label}: ` : "") +
         (data.cityName && data.regionName
           ? `${data.cityName}, ${data.regionName}`
           : data.cityName ||
@@ -252,9 +253,23 @@ function App() {
       coords.latitude,
       coords.longitude,
       undefined,
-      "Current Location",
+      CURRENT_LOCATION,
       CURRENT_LOCATION_ID,
     );
+  };
+
+  const handleRemoveTime = (id: string) => {
+    setTimes((prevTimes) => prevTimes.filter((item) => item.id !== id));
+
+    const layer = graphicsLayerRef.current;
+    if (!layer) {
+      return;
+    }
+
+    const graphic = layer.graphics.find((item) => item.attributes?.id === id);
+    if (graphic) {
+      layer.remove(graphic);
+    }
   };
 
   return (
@@ -276,7 +291,7 @@ function App() {
         onLocateSuccess={handleLocateSuccess}
       />
 
-      <TimeListPanel times={times} now={now} />
+      <TimeListPanel times={times} now={now} onRemove={handleRemoveTime} />
     </calcite-shell>
   );
 }
