@@ -25,7 +25,6 @@ function App() {
     const intervalId = window.setInterval(() => {
       setNow(Date.now());
     }, 30000);
-
     return () => window.clearInterval(intervalId);
   }, []);
 
@@ -34,7 +33,6 @@ function App() {
     if (existingColor) {
       return existingColor;
     }
-
     const hue = (colorIndexRef.current * 137.508) % 360;
     colorIndexRef.current += 1;
     const color = `hsl(${Math.round(hue)}, 70%, 50%)`;
@@ -104,9 +102,16 @@ function App() {
       const color = getTimeZoneColor(timeZone);
 
       if (mapPoint && graphicsLayerRef.current) {
+        const pending = graphicsLayerRef.current.graphics.find(
+          (g) => g.attributes?.id === id && g.attributes?.kind === "pending",
+        );
+        if (pending) {
+          graphicsLayerRef.current.remove(pending);
+        }
+
         graphicsLayerRef.current.add(
           new Graphic({
-            attributes: { id },
+            attributes: { id, kind: "resolved" },
             geometry: mapPoint,
             symbol: {
               type: "simple-marker",
@@ -167,9 +172,11 @@ function App() {
 
   const handleClick = async (e: CustomEvent) => {
     const mapPoint = e.detail.mapPoint as Point;
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     if (graphicsLayerRef.current) {
       const graphic = new Graphic({
+        attributes: { id, kind: "pending" },
         geometry: mapPoint,
         symbol: {
           type: "simple-marker",
@@ -191,6 +198,8 @@ function App() {
       geographicPoint.latitude,
       geographicPoint.longitude,
       mapPoint,
+      undefined,
+      id,
     );
   };
 
