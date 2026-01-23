@@ -1,168 +1,21 @@
 import type Point from "@arcgis/core/geometry/Point";
 import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import "./App.css";
 import { Map } from "./components/Map";
 import { TimeListPanel } from "./components/TimeListPanel";
-import type { LocationTime } from "./types";
+import { useTimeEntries } from "./hooks/useTimeEntries";
 import { toGeographic } from "./utils/geometry";
 import { CURRENT_LOCATION, CURRENT_LOCATION_ID } from "./utils/map";
-
-const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
-const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
+import { removeGraphicsById } from "./utils/mapGraphics";
 
 function App() {
-  const [now, setNow] = useState(() => Date.now());
-  const [times, setTimes] = useState<LocationTime[]>([]);
+  const { times, now, addTimeEntry, removeTimeEntry } = useTimeEntries();
+
   const mapRef = useRef<HTMLArcgisMapElement | null>(null);
   const locateRef = useRef<HTMLArcgisLocateElement | null>(null);
   const graphicsLayerRef = useRef<GraphicsLayer | null>(null);
-  const colorIndexRef = useRef(0);
-  const timeZoneColorsRef = useRef<Record<string, string>>({});
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 30000);
-    return () => window.clearInterval(intervalId);
-  }, []);
-
-  const getTimeZoneColor = (timeZone: string) => {
-    const existingColor = timeZoneColorsRef.current[timeZone];
-    if (existingColor) {
-      return existingColor;
-    }
-    const hue = (colorIndexRef.current * 137.508) % 360;
-    colorIndexRef.current += 1;
-    const color = `hsl(${Math.round(hue)}, 70%, 50%)`;
-    timeZoneColorsRef.current[timeZone] = color;
-    return color;
-  };
-
-  const addTimeEntry = async (
-    latitude: number,
-    longitude: number,
-    mapPoint?: Point,
-    labelOverride?: string,
-    entryId?: string,
-  ) => {
-    const displayLatitude = Number(latitude.toFixed(4));
-    const displayLongitude = Number(longitude.toFixed(4));
-    const id =
-      entryId ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const label = labelOverride ?? `${displayLatitude}, ${displayLongitude}`;
-
-    setTimes((prevTimes) => {
-      const existingIndex = prevTimes.findIndex((item) => item.id === id);
-      const updatedEntry = {
-        id,
-        label,
-        timeZone: "UTC",
-        latitude: displayLatitude,
-        longitude: displayLongitude,
-        isLoading: true,
-      };
-
-      if (existingIndex >= 0) {
-        const nextTimes = [...prevTimes];
-        nextTimes[existingIndex] = updatedEntry;
-        return nextTimes;
-      }
-
-      return [updatedEntry, ...prevTimes];
-    });
-
-    try {
-      if (!TIMEZONEDB_API_KEY) {
-        throw new Error("Missing VITE_TIMEZONEDB_API_KEY");
-      }
-
-      const params = new URLSearchParams({
-        key: TIMEZONEDB_API_KEY,
-        format: "json",
-        by: "position",
-        lat: `${latitude}`,
-        lng: `${longitude}`,
-      });
-      const response = await fetch(
-        `${TIMEZONEDB_ENDPOINT}?${params.toString()}`,
-      );
-      if (!response.ok) {
-        throw new Error(`Time zone lookup failed (${response.status})`);
-      }
-      const data = await response.json();
-      if (data.status && data.status !== "OK") {
-        throw new Error(
-          `Time zone lookup failed (${data.message || data.status})`,
-        );
-      }
-
-      const timeZone = data.zoneName || "UTC";
-      const color = getTimeZoneColor(timeZone);
-
-      if (mapPoint && graphicsLayerRef.current) {
-        const pending = graphicsLayerRef.current.graphics.find(
-          (g) => g.attributes?.id === id && g.attributes?.kind === "pending",
-        );
-        if (pending) {
-          graphicsLayerRef.current.remove(pending);
-        }
-
-        graphicsLayerRef.current.add(
-          new Graphic({
-            attributes: { id, kind: "resolved" },
-            geometry: mapPoint,
-            symbol: {
-              type: "simple-marker",
-              color,
-              size: 8,
-              outline: { color: "#fff", width: 1 },
-            },
-          }),
-        );
-      }
-
-      const locationLabel =
-        (label === CURRENT_LOCATION ? `${label}: ` : "") +
-        (data.cityName && data.regionName
-          ? `${data.cityName}, ${data.regionName}`
-          : data.cityName ||
-            data.regionName ||
-            data.countryCode ||
-            timeZone ||
-            label);
-
-      setTimes((prevTimes) =>
-        prevTimes.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                timeZone,
-                label: locationLabel,
-                isLoading: false,
-                color,
-              }
-            : item,
-        ),
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Time zone lookup failed";
-      console.error(message);
-      setTimes((prevTimes) =>
-        prevTimes.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                isLoading: false,
-                error: message,
-              }
-            : item,
-        ),
-      );
-    }
-  };
 
   const handleViewReady = () => {
     const layer = new GraphicsLayer();
@@ -268,17 +121,9 @@ function App() {
   };
 
   const handleRemoveTime = (id: string) => {
-    setTimes((prevTimes) => prevTimes.filter((item) => item.id !== id));
-
     const layer = graphicsLayerRef.current;
-    if (!layer) {
-      return;
-    }
-
-    const graphic = layer.graphics.find((item) => item.attributes?.id === id);
-    if (graphic) {
-      layer.remove(graphic);
-    }
+    if (layer) removeGraphicsById(layer, id);
+    removeTimeEntry(id);
   };
 
   return (
