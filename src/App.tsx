@@ -1,5 +1,4 @@
 import type Point from "@arcgis/core/geometry/Point";
-import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { useRef } from "react";
 import "./App.css";
@@ -8,7 +7,11 @@ import { TimeListPanel } from "./components/TimeListPanel";
 import { useTimeEntries } from "./hooks/useTimeEntries";
 import { toGeographic } from "./utils/geometry";
 import { CURRENT_LOCATION, CURRENT_LOCATION_ID } from "./utils/map";
-import { removeGraphicsById } from "./utils/mapGraphics";
+import {
+  addPendingGraphic,
+  removeGraphicsById,
+  replaceWithResolvedGraphic,
+} from "./utils/mapGraphics";
 
 function App() {
   const { times, now, addTimeEntry, removeTimeEntry } = useTimeEntries();
@@ -28,17 +31,7 @@ function App() {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     if (graphicsLayerRef.current) {
-      const graphic = new Graphic({
-        attributes: { id, kind: "pending" },
-        geometry: mapPoint,
-        symbol: {
-          type: "simple-marker",
-          color: "#fff",
-          size: 8,
-          outline: { color: "#fff", width: 1 },
-        },
-      });
-      graphicsLayerRef.current.add(graphic);
+      addPendingGraphic(graphicsLayerRef.current, mapPoint, id);
     }
 
     const geographicPoint = toGeographic(mapPoint);
@@ -53,6 +46,16 @@ function App() {
       mapPoint,
       undefined,
       id,
+      (color, entryId, point) => {
+        if (graphicsLayerRef.current && point) {
+          replaceWithResolvedGraphic(
+            graphicsLayerRef.current,
+            point,
+            entryId,
+            color,
+          );
+        }
+      },
     );
   };
 
