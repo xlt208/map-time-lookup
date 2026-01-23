@@ -48,5 +48,7 @@ export const replaceWithResolvedGraphic = (
 
 export const removeGraphicsById = (layer: GraphicsLayer, id: string) => {
   const graphics = layer.graphics.filter((g) => g.attributes?.id === id);
-  graphics.removeMany(graphics);
+  if (graphics.length) {
+    layer.removeMany(graphics.toArray());
+  }
 };
