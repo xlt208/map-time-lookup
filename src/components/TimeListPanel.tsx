@@ -1,5 +1,4 @@
 import type { LocationTime } from "../types";
-import { CURRENT_LOCATION_ID } from "../utils/map";
 import { formatTime } from "../utils/time";
 
 interface TimeListPanelProps {
@@ -9,13 +8,6 @@ interface TimeListPanelProps {
 }
 
 export const TimeListPanel = ({ times, now, onRemove }: TimeListPanelProps) => {
-  const handleItemClose = (id: string) => {
-    if (id === CURRENT_LOCATION_ID) {
-      return;
-    }
-    onRemove(id);
-  };
-
   return (
     <calcite-shell-panel
       width="l"
@@ -39,10 +31,10 @@ export const TimeListPanel = ({ times, now, onRemove }: TimeListPanelProps) => {
             return (
               <calcite-list-item
                 key={item.id}
-                closable={item.id !== CURRENT_LOCATION_ID}
+                closable
                 description={description}
                 label={item.label}
-                oncalciteListItemClose={() => handleItemClose(item.id)}
+                oncalciteListItemClose={() => onRemove(item.id)}
               >
                 <span
                   slot="content-start"

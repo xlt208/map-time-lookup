@@ -6,7 +6,7 @@ import { Map } from "./components/Map";
 import { TimeListPanel } from "./components/TimeListPanel";
 import { useTimeEntries } from "./hooks/useTimeEntries";
 import { toGeographic } from "./utils/geometry";
-import { CURRENT_LOCATION, CURRENT_LOCATION_ID } from "./utils/map";
+import { CURRENT_LOCATION_ID } from "./utils/map";
 import {
   addPendingGraphic,
   removeGraphicsById,
@@ -118,7 +118,7 @@ function App() {
       coords.latitude,
       coords.longitude,
       undefined,
-      CURRENT_LOCATION,
+      undefined,
       CURRENT_LOCATION_ID,
     );
   };

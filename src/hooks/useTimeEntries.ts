@@ -1,7 +1,7 @@
 import type Point from "@arcgis/core/geometry/Point";
 import { useEffect, useRef, useState } from "react";
 import type { LocationTime } from "../types";
-import { CURRENT_LOCATION } from "../utils/map";
+import { CURRENT_LOCATION_ID } from "../utils/map";
 
 const TIMEZONEDB_ENDPOINT = "https://api.timezonedb.com/v2.1/get-time-zone";
 const TIMEZONEDB_API_KEY = import.meta.env.VITE_TIMEZONEDB_API_KEY;
@@ -92,7 +92,7 @@ export const useTimeEntries = () => {
       const color = getTimeZoneColor(timeZone);
 
       const locationLabel =
-        (label === CURRENT_LOCATION ? `${label}: ` : "") +
+        (id === CURRENT_LOCATION_ID ? "Current Location: " : "") +
         (data.cityName && data.regionName
           ? `${data.cityName}, ${data.regionName}`
           : data.cityName ||
