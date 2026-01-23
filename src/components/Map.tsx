@@ -34,7 +34,10 @@ export const Map = ({
       locationDisabled={true}
       resultGraphicDisabled={true}
       goToOverride={(view, goToParams) => {
-        return view.goTo({ target: goToParams.target.target, zoom: MAP_ZOOM });
+        return view.goTo(
+          { ...goToParams.target, zoom: MAP_ZOOM },
+          goToParams.options,
+        );
       }}
       onarcgisSelectResult={onSearchSelect}
     />
