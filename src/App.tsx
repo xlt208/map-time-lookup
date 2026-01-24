@@ -9,6 +9,7 @@ import { toGeographic } from "./utils/geometry";
 import { CURRENT_LOCATION_ID } from "./utils/map";
 import {
   addPendingGraphic,
+  markGraphicError,
   removeGraphicsById,
   replaceWithResolvedGraphic,
 } from "./utils/mapGraphics";
@@ -54,6 +55,11 @@ function App() {
             entryId,
             color,
           );
+        }
+      },
+      (entryId) => {
+        if (graphicsLayerRef.current) {
+          markGraphicError(graphicsLayerRef.current, entryId);
         }
       },
     );
@@ -103,6 +109,22 @@ function App() {
       geographicPoint.longitude,
       mapPoint,
       result?.name,
+      undefined,
+      (color, entryId, point) => {
+        if (graphicsLayerRef.current && point) {
+          replaceWithResolvedGraphic(
+            graphicsLayerRef.current,
+            point,
+            entryId,
+            color,
+          );
+        }
+      },
+      (entryId) => {
+        if (graphicsLayerRef.current) {
+          markGraphicError(graphicsLayerRef.current, entryId);
+        }
+      },
     );
   };
 
@@ -120,6 +142,12 @@ function App() {
       undefined,
       undefined,
       CURRENT_LOCATION_ID,
+      undefined,
+      (entryId) => {
+        if (graphicsLayerRef.current) {
+          markGraphicError(graphicsLayerRef.current, entryId);
+        }
+      },
     );
   };
 

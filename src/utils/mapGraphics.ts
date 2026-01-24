@@ -52,3 +52,23 @@ export const removeGraphicsById = (layer: GraphicsLayer, id: string) => {
     layer.removeMany(graphics.toArray());
   }
 };
+
+export const markGraphicError = (
+  layer: GraphicsLayer,
+  id: string,
+  color = "#888",
+) => {
+  const graphic = layer.graphics.find(
+    (g) => g.attributes?.id === id && g.attributes?.kind === "pending",
+  );
+  if (!graphic) {
+    return;
+  }
+
+  graphic.symbol = {
+    type: "simple-marker",
+    color,
+    size: 8,
+    outline: { color: "#fff", width: 1 },
+  };
+};

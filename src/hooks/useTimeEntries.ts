@@ -36,6 +36,7 @@ export const useTimeEntries = () => {
     labelOverride?: string,
     entryId?: string,
     onResolved?: (color: string, id: string, mapPoint?: Point) => void,
+    onError?: (id: string, mapPoint?: Point) => void,
   ) => {
     const displayLatitude = Number(latitude.toFixed(4));
     const displayLongitude = Number(longitude.toFixed(4));
@@ -130,6 +131,7 @@ export const useTimeEntries = () => {
             : item,
         ),
       );
+      onError?.(id, mapPoint);
     }
   };
 
