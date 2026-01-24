@@ -1,7 +1,8 @@
 import type Point from "@arcgis/core/geometry/Point";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+
 import { useRef } from "react";
-import "./App.css";
+
 import { Map } from "./components/Map";
 import { TimeListPanel } from "./components/TimeListPanel";
 import { useTimeEntries } from "./hooks/useTimeEntries";
@@ -14,12 +15,24 @@ import {
   replaceWithResolvedGraphic,
 } from "./utils/mapGraphics";
 
+import "./App.css";
+
 function App() {
   const { times, now, addTimeEntry, removeTimeEntry } = useTimeEntries();
 
   const mapRef = useRef<HTMLArcgisMapElement | null>(null);
   const locateRef = useRef<HTMLArcgisLocateElement | null>(null);
   const graphicsLayerRef = useRef<GraphicsLayer | null>(null);
+
+  const createEntryContext = (mapPoint?: Point) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    if (mapPoint && graphicsLayerRef.current) {
+      addPendingGraphic(graphicsLayerRef.current, mapPoint, id);
+    }
+
+    return { id };
+  };
 
   const handleViewReady = () => {
     const layer = new GraphicsLayer();
@@ -46,11 +59,7 @@ function App() {
 
   const handleClick = async (e: CustomEvent) => {
     const mapPoint = e.detail.mapPoint as Point;
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-    if (graphicsLayerRef.current) {
-      addPendingGraphic(graphicsLayerRef.current, mapPoint, id);
-    }
+    const { id } = createEntryContext(mapPoint);
 
     const geographicPoint = toGeographic(mapPoint);
     if (geographicPoint.latitude == null || geographicPoint.longitude == null) {
@@ -67,20 +76,6 @@ function App() {
       handleResolved,
       handleError,
     );
-  };
-
-  const handleLocateReady = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async () => {
-          await locateRef.current?.componentOnReady();
-          locateRef.current?.locate();
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-        },
-      );
-    }
   };
 
   const handleSearchSelect = async (e: CustomEvent) => {
@@ -108,15 +103,31 @@ function App() {
       return;
     }
 
+    const { id } = createEntryContext(mapPoint);
+
     await addTimeEntry(
       geographicPoint.latitude,
       geographicPoint.longitude,
       mapPoint,
       result?.name,
-      undefined,
+      id,
       handleResolved,
-      handleError,
+      undefined,
     );
+  };
+
+  const handleLocateReady = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async () => {
+          await locateRef.current?.componentOnReady();
+          locateRef.current?.locate();
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+        },
+      );
+    }
   };
 
   const handleLocateSuccess = async (e: CustomEvent) => {
