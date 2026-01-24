@@ -20,7 +20,11 @@ export const TimeListPanel = ({ times, now, onRemove }: TimeListPanelProps) => {
         heading="Current Local Times"
         description="Click on the map to view the local time."
       >
-        <calcite-list label="Current Local Times">
+        <calcite-list
+          label="Current Local Times"
+          filterEnabled
+          filterLabel="Filter times"
+        >
           {times.map((item) => {
             const description = item.isLoading
               ? "Fetching time zone..."
