@@ -27,6 +27,23 @@ function App() {
     graphicsLayerRef.current = layer;
   };
 
+  const handleResolved = (color: string, entryId: string, point?: Point) => {
+    if (graphicsLayerRef.current && point) {
+      replaceWithResolvedGraphic(
+        graphicsLayerRef.current,
+        point,
+        entryId,
+        color,
+      );
+    }
+  };
+
+  const handleError = (entryId: string) => {
+    if (graphicsLayerRef.current) {
+      markGraphicError(graphicsLayerRef.current, entryId);
+    }
+  };
+
   const handleClick = async (e: CustomEvent) => {
     const mapPoint = e.detail.mapPoint as Point;
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -47,21 +64,8 @@ function App() {
       mapPoint,
       undefined,
       id,
-      (color, entryId, point) => {
-        if (graphicsLayerRef.current && point) {
-          replaceWithResolvedGraphic(
-            graphicsLayerRef.current,
-            point,
-            entryId,
-            color,
-          );
-        }
-      },
-      (entryId) => {
-        if (graphicsLayerRef.current) {
-          markGraphicError(graphicsLayerRef.current, entryId);
-        }
-      },
+      handleResolved,
+      handleError,
     );
   };
 
@@ -110,21 +114,8 @@ function App() {
       mapPoint,
       result?.name,
       undefined,
-      (color, entryId, point) => {
-        if (graphicsLayerRef.current && point) {
-          replaceWithResolvedGraphic(
-            graphicsLayerRef.current,
-            point,
-            entryId,
-            color,
-          );
-        }
-      },
-      (entryId) => {
-        if (graphicsLayerRef.current) {
-          markGraphicError(graphicsLayerRef.current, entryId);
-        }
-      },
+      handleResolved,
+      handleError,
     );
   };
 
@@ -143,11 +134,7 @@ function App() {
       undefined,
       CURRENT_LOCATION_ID,
       undefined,
-      (entryId) => {
-        if (graphicsLayerRef.current) {
-          markGraphicError(graphicsLayerRef.current, entryId);
-        }
-      },
+      handleError,
     );
   };
 
