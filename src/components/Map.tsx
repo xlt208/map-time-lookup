@@ -7,7 +7,6 @@ interface MapProps {
   onViewReady: (e: CustomEvent) => void;
   onViewClick: (e: CustomEvent) => void;
   onSearchSelect: (e: CustomEvent) => void;
-  onLocateReady: (e: CustomEvent) => void;
   onLocateSuccess: (e: CustomEvent) => void;
 }
 
@@ -17,7 +16,6 @@ export const Map = ({
   onViewReady,
   onViewClick,
   onSearchSelect,
-  onLocateReady,
   onLocateSuccess,
 }: MapProps) => (
   <arcgis-map
@@ -44,9 +42,8 @@ export const Map = ({
     <arcgis-zoom slot="top-end" />
     <arcgis-locate
       ref={locateRef}
-      slot="bottom-end"
+      slot="bottom-start"
       scale={MAP_SCALE}
-      onarcgisReady={onLocateReady}
       onarcgisSuccess={onLocateSuccess}
     />
   </arcgis-map>

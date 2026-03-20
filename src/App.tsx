@@ -116,20 +116,6 @@ function App() {
     );
   };
 
-  const handleLocateReady = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async () => {
-          await locateRef.current?.componentOnReady();
-          locateRef.current?.locate();
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-        },
-      );
-    }
-  };
-
   const handleLocateSuccess = async (e: CustomEvent) => {
     const position = e.detail?.position as GeolocationPosition | undefined;
     const coords = position?.coords;
@@ -170,7 +156,6 @@ function App() {
         onViewReady={handleViewReady}
         onViewClick={handleClick}
         onSearchSelect={handleSearchSelect}
-        onLocateReady={handleLocateReady}
         onLocateSuccess={handleLocateSuccess}
       />
 
